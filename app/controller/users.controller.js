@@ -1,42 +1,39 @@
-let db = require("../models/db");
-let User = db.users;
-
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { User } = require('../models/db');
+const erreurCall = require('../services/call.service');
+const privateKey = require('../config/private-key');
 
 exports.login = async (req, res) => {
-
-    try {
-
-        //trouver le user avec le parametre email == req.body.email
-        const user = await User.findOne({ where: { email: req.body.email } });
-
-        if (!user) {
-            res.status(404);
-            res.json({ "message": "Aucun utilisateur n'existe avec cet email" })
-            return;
-        }
-
-
-        if (req.body.password == user.dataValues.password) {
-        
-            //recuperer le student qui est en relation avec notre user : la methode getStudent() est automatiquement genérée par Sequelize suivant la relation défnie auparavant 
-            let student = await user.getStudent()
-            res.json({user : user,
-                student : student
+    if (req.body.email && req.body.password) {
+        try {
+            const user = await User.findOne({where: {email : req.body.email}})
+            if(!user) {
+                return res.status(404).json({message : "C'est email ne correspond à aucun compte"});
+            }
+            const verifPassword = bcrypt.compareSync(req.body.password, user.password);
+            if(!verifPassword) {
+                const message = "Le mdp est incorrect";
+                return res.status(401).json({message});
+            }
+            //si notre mail et password est bon on donne un token à l'utilisateur
+            const token = jwt.sign(
+                {userId: user.id},
+                privateKey.privateKey,
+                {expiresIn : '24h'}
+            );
+            const message = "Vous vous êtes bien identifié - Merci de récupérer le token pour futur requete de l'API";
+            res.json({
+                message,
+                date: user, token
             });
 
-        } else {
-            res.status(401);
-            res.json({ "message": "Le mot de passe est erroné" })
+        } catch (error) {
+            erreurCall(error, res);
         }
-
-
-
-
-    } catch (e) {
-        res.status(500);
-            res.json({ "message": e })
+    } else {
+        res.status(400).json("Demade de login annulée. Merci de renseigner votre email et votre mot de passe");
     }
-   
 }
 
 
@@ -50,19 +47,19 @@ exports.register = async (req, res) => {
 
             let result = await User.create(req.body);
             res.json(result);
-            
+
         } else {
             res.status(409);
             res.json({ "message": 'Cet email est déja utilisé' })
         }
 
-       
+
 
 
     } catch (e) {
         res.status(500);
-            res.json({ "message": e })
+        res.json({ "message": e })
     }
-   
+
 }
 

@@ -1,11 +1,48 @@
-let db = require('../models/db')
-const Student = db.students;
-const Lesson = db.lessons;
+const { Student } = require('../models/db');
+const { getAge } = require('../services/students.services');
+const erreurCall = require('../services/call.service');
 
-let StudentC = require('../models/student');
+
+exports.getAll = async (req, res) => {
+   try {
+      let listeEtudiants = await Student.findAll();
+      if (!listeEtudiants.length) {
+         const message = "La liste des étudiants est vide";
+         return res.json(message);
+      }
+      // Mise à jour de la liste Etudiant avec l'age
+      listeEtudiants = listeEtudiants.map(etudiant => {
+         etudiant.age = getAge(etudiant.birthdate);
+         return etudiant;
+      });
+      const message = `La liste a été récupérée. Il y'a en en tout ${listeEtudiants.length} étudiants`;
+      res.json({ message, listeEtudiants });
+
+      res.json(resp);
+   } catch (error) {
+      erreurCall(error, res);
+   }
+}
+
+exports.getById = async (req, res) => {
+   try {
+      let etudiant = await Student.findByPk(req.params.id)
+      if (etudiant === null) {
+         const message = "L'étudiant demandé n'existe pas, tant pis pour toi frérot";
+         res.status(400).json(message);
+      }
+      // Mise à jour de la liste Etudiant avec l'age
+      etudiant.age = getAge(etudiant.birthdate);
+      const message = "Un etudiant a bien été trouvé";
+      res.json({ message, etudiant });
+   }
+   catch (error) {
+      erreurCall(error, res);
+   }
+}
 
 //importer le service
-const studentsService = require('../services/students.services')
+/*const studentsService = require('../services/students.services')
 exports.create = async (req, res) => {
    if (req.body.first_name && req.body.last_name && req.body.birthdate && req.body.bio && req.body.class_name) {
       try {
@@ -19,27 +56,12 @@ exports.create = async (req, res) => {
       res.status(400)
       res.json({ 'message': 'bad request' });
    }
-}
-
-exports.getById = async (req, resp) => {
-   try {
-      let result = await Student.findByPk(req.params.id)
-      let age = studentsService.getYears(result.dataValues.birthdate)
-      
-      console.log(result);
-              //importer le service
-              let newRes = new StudentC(result.dataValues.id,  result.dataValues.first_name,result.dataValues.last_name,result.dataValues.birthdate, result.dataValues.bio, result.dataValues.class_name, age)
-              console.log(age)
-         resp.json(newRes);
-   } catch (e) {
-      resp.status(500);
-      resp.json({ error: e });
-   }
-
-  
-}
+}*/
 
 
+
+
+/*
 exports.addLesson = async (req, resp) => {
    try {
       let student = await Student.findByPk(req.params.id2)
@@ -47,38 +69,17 @@ exports.addLesson = async (req, resp) => {
       await lesson.setStudents(student);
       let lessons = await student.getLessons();
       resp.json(lessons);
-     
+
    } catch (e) {
       console.log(e);
       resp.status(500);
       resp.json({ error: e });
    }
+}*/
 
-  
-}
 
-exports.getAll = async (req, res) => {
-    try {
-       let resp = await Student.findAll();
-       
-       console.log(resp);
 
-       let newResult = resp.map((result) => {
-          let age = studentsService.getYears(result.dataValues.birthdate)
-          console.log(age);
-          console.log(result);
-          //importer le service
-          return new StudentC(result.dataValues.id, result.dataValues.first_name, result.dataValues.last_name, result.dataValues.birthdate, result.dataValues.bio, result.dataValues.class_name, age)
-       }); 
-
-        res.json(newResult);
-   } catch (e) {
-      res.json(500);
-      res.json({ error: e });
-   }
-    
-}
-
+/*
 exports.update = async (req, res) => {
    try {
        await Student.update(req.body, {
@@ -91,11 +92,10 @@ exports.update = async (req, res) => {
       resp.json(500);
       resp.json({ error: e });
    }
- 
-
-
 }
+*/
 
+/*
 exports.remove = async (req, resp) =>{
 try {
        await Student.destroy({
@@ -110,3 +110,4 @@ try {
       resp.json({ error: e });
    }
 }
+*/

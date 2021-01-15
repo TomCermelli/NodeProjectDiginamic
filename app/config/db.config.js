@@ -2,6 +2,5 @@ module.exports = {
     HOST:"localhost",
     USER: 'root',
     PASSWORD:'',
-    DB: 'expressdb',
-    DIALECT : 'mysql'
+    DB: 'expressdb'
 };
