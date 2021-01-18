@@ -6,11 +6,17 @@ module.exports = (sequelize, Sequelize) => {
       autoIncrement: true
     },
     email: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      unique: {
+        msg: "Cet email est déja utilisé"
+      }
     },
     password: {
       type: Sequelize.STRING
     },
-  });
+  },
+    {
+      timestamps: false
+    });
   return User;
 };
