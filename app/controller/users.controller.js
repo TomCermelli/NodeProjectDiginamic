@@ -1,15 +1,34 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/db');
+const { User, Student } = require('../models/db');
 const erreurCall = require('../services/call.service');
 const privateKey = require('../config/private-key');
 const { checkDuplicateEmail } = require('../services/user.service');
+const studentMethodes = require('../controller/students.controller');
+
+exports.createProfil = async (req, res) => {
+    try {
+        const id = res.locals.id;
+        const user = await User.findByPk(id);
+        const userProfil = await studentMethodes.create(req, res);
+        console.log(userProfil);
+        await user.setStudent(userProfil);
+        const message = "Votre profil étudiant a bien été crée avec succès"
+        res.json({
+            message,
+            newStudentProfil: userProfil
+        })
+    }
+    catch (error) {
+        erreurCall(error, res);
+    }
+}
 
 exports.login = async (req, res, userRegister = null, messageRegister = null) => {
     if (req.body.email && req.body.password) {
         try {
             let user;
-            
+
             if (userRegister != "object") {
                 user = await User.findOne({ where: { email: req.body.email } })
                 if (!user) {
@@ -70,3 +89,17 @@ exports.register = async (req, res) => {
     }
 }
 
+exports.getInfo = async (req, res) => {
+    try {
+        const id = res.locals.id;
+        const user = await User.findByPk(id);
+        const message = "Vos infos ont bien été récupérée.";
+        res.json({
+            message,
+            user
+        });
+    } catch (error) {
+        erreurCall(error, res);
+    }
+
+}

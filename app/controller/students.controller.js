@@ -42,23 +42,15 @@ exports.getById = async (req, res) => {
 }
 
 //importer le service
-/*const studentsService = require('../services/students.services')
 exports.create = async (req, res) => {
-   if (req.body.first_name && req.body.last_name && req.body.birthdate && req.body.bio && req.body.class_name) {
+   
       try {
-         let rep = await Student.create(req.body)
-         res.json(rep);
-      } catch (e) {
-         res.status(500)
-         res.json({ "error": e });
+         const etudiant = await Student.create(req.body);
+         return etudiant;
+      } catch (error) {
+         erreurCall(error, res)
       }
-     } else {
-      res.status(400)
-      res.json({ 'message': 'bad request' });
-   }
-}*/
-
-
+}
 
 
 /*

@@ -19,6 +19,10 @@ const Student = studentModel(sequelize, DataTypes);
 const Lesson = lessonModel(sequelize, DataTypes);
 const User = userModel(sequelize, DataTypes);
 
+//créer la relation One-to-one entre User et Student
+Student.hasOne(User); // clé etrangere dans la cible -> table users va contneir une clé etrangerere nommée "studentId"
+User.belongsTo(Student); // cle strangere dans la source -> studentId;
+
 const initDb = () => {
   return sequelize.sync({force : true})
     .then(_ => {
@@ -37,12 +41,7 @@ const initDb = () => {
 
 }
 
-/*
-//créer la relation One-to-one entre User et Student
-db.students.hasOne(db.users);
-db.users.belongsTo(db.students);
-
-//créer la relation Many-to-Many entre Student et User
+/*//créer la relation Many-to-Many entre Student et User
 db.students.belongsToMany(db.lessons, { through: 'LessonStudents' });
 db.lessons.belongsToMany(db.students, { through: 'LessonStudents' });
 
